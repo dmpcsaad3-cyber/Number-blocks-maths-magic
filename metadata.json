@@ -1,0 +1,6 @@
+{
+  "name": "Numberblocks Math",
+  "description": "Realistic 3D Numberblocks & Alphablocks math adventures with Addition, Subtraction, Multiplication, Division up to 10,000, Magic Mirror, Oblong Arrays, Wonder Blocks, Level-ups, and Leaderboards.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

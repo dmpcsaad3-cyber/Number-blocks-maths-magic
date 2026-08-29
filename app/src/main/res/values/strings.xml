@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Numberblocks Math</string>
+    <string name="title_numberblocks">Numberblocks Math World</string>
+    <string name="mode_operations">Math Lab (+, -, ×, ÷)</string>
+    <string name="mode_magic_mirror">Magic Mirror</string>
+    <string name="mode_oblong">Oblong &amp; Arrays</string>
+    <string name="mode_wonder_blocks">Wonder Blocks (to 10,000)</string>
+    <string name="mode_alphablocks">Alphablocks Words</string>
+    <string name="mode_leaderboard">Leaderboard &amp; Badges</string>
+    <string name="mode_level_up">Level &amp; Powers</string>
+</resources>
