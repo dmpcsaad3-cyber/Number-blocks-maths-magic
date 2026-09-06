@@ -8,12 +8,32 @@ workflows:
       - name: Build Android Debug APK with Gradle 9.3.1
         script: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/local.properties"
+
+          # Restore debug.keystore from base64 or generate if missing
+          if [ -f "debug.keystore.base64" ]; then
+            echo "Restoring debug.keystore..."
+            python3 -c "import base64; open('debug.keystore', 'wb').write(base64.b64decode(open('debug.keystore.base64').read().strip()))" 2>/dev/null || \
+            base64 --decode debug.keystore.base64 > debug.keystore 2>/dev/null || \
+            base64 -d debug.keystore.base64 > debug.keystore 2>/dev/null || \
+            base64 -D debug.keystore.base64 > debug.keystore 2>/dev/null || true
+          fi
+
+          if [ ! -f "debug.keystore" ] || [ ! -s "debug.keystore" ]; then
+            echo "Generating fresh debug.keystore..."
+            keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
+          # Ensure .env file exists for secrets plugin
+          touch .env
+
           echo "Downloading Gradle 9.3.1..."
           curl -sSL "https://services.gradle.org/distributions/gradle-9.3.1-bin.zip" -o "$HOME/gradle-9.3.1-bin.zip"
           unzip -q -o "$HOME/gradle-9.3.1-bin.zip" -d "$HOME/gradle_dist"
           export PATH="$HOME/gradle_dist/gradle-9.3.1/bin:$PATH"
+
           echo "Gradle version check:"
           gradle --version
+
           echo "Building APK..."
           gradle assembleDebug --stacktrace
     artifacts:
