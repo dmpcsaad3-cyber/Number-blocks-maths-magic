@@ -24,7 +24,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.data.model.NumberblocksRepository
+import com.example.model.NumberblocksRegistry
 import com.example.viewmodel.MainViewModel
 
 @Composable
@@ -38,7 +38,7 @@ fun OblongScreen(
     val currentCols by viewModel.oblongCols.collectAsState()
     val availableFactorPairs by viewModel.oblongFactorPairs.collectAsState()
 
-    val character = NumberblocksRepository.getCharacter(selectedNumber)
+    val character = NumberblocksRegistry.getBlockForValue(selectedNumber)
 
     LazyColumn(
         modifier = modifier
@@ -198,7 +198,8 @@ fun OblongScreen(
                                                     horizontalArrangement = Arrangement.spacedBy(2.dp),
                                                     verticalAlignment = Alignment.CenterVertically
                                                 ) {
-                                                    repeat(character.eyeCount) {
+                                                    val eyeCount = if (character.value == 1) 1 else 2
+                                                    repeat(eyeCount) {
                                                         Box(
                                                             modifier = Modifier
                                                                 .size(4.dp)

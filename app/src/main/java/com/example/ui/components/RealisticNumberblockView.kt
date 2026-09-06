@@ -38,6 +38,9 @@ fun RealisticNumberblockView(
     number: Int,
     modifier: Modifier = Modifier,
     sizeDp: Dp = 140.dp,
+    blockSize: Dp? = null,
+    showNumberTag: Boolean = false,
+    showCatchphrase: Boolean = false,
     customRows: Int? = null,
     customCols: Int? = null,
     showGlow: Boolean = false,
@@ -45,6 +48,11 @@ fun RealisticNumberblockView(
     onClick: (() -> Unit)? = null
 ) {
     val blockData = remember(number) { NumberblocksRegistry.getBlockForValue(number) }
+    val effectiveSize = blockSize?.let { bs ->
+        val rows = (customRows ?: blockData.defaultRows).coerceIn(1, 6)
+        (bs * (rows + 1)).coerceIn(50.dp, 160.dp)
+    } ?: sizeDp
+
     val infiniteTransition = rememberInfiniteTransition(label = "block_bounce")
     val bounceOffset by infiniteTransition.animateFloat(
         initialValue = -3f,
@@ -66,54 +74,86 @@ fun RealisticNumberblockView(
         label = "glow"
     )
 
-    Box(
-        modifier = modifier
-            .size(sizeDp)
-            .testTag("numberblock_${number}")
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                enabled = interactive
-            ) {
-                SoundFX.playNumberblockPop(number)
-                onClick?.invoke()
-            },
-        contentAlignment = Alignment.Center
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val canvasW = size.width
-            val canvasH = size.height
-
-            // Glow effect if active or large number
-            if (showGlow || number >= 1000) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(
-                            blockData.primaryColor.copy(alpha = glowAlpha * 0.7f),
-                            blockData.secondaryColor.copy(alpha = glowAlpha * 0.3f),
-                            Color.Transparent
-                        ),
-                        center = Offset(canvasW / 2, canvasH / 2 + bounceOffset),
-                        radius = canvasW * 0.6f
-                    )
+        if (showNumberTag) {
+            Surface(
+                shape = RoundedCornerShape(6.dp),
+                color = Color.Black.copy(alpha = 0.7f),
+                modifier = Modifier.padding(bottom = 2.dp)
+            ) {
+                Text(
+                    text = "$number",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                 )
             }
+        }
 
-            // Draw Base Layout according to number type
-            when {
-                number >= 10000 -> {
-                    drawTenThousandMegaBlock(blockData, canvasW, canvasH, bounceOffset)
+        Box(
+            modifier = Modifier
+                .size(effectiveSize)
+                .testTag("numberblock_${number}")
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    enabled = interactive
+                ) {
+                    SoundFX.playNumberblockPop(number)
+                    onClick?.invoke()
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val canvasW = size.width
+                val canvasH = size.height
+
+                // Glow effect if active or large number
+                if (showGlow || number >= 1000) {
+                    drawCircle(
+                        brush = Brush.radialGradient(
+                            colors = listOf(
+                                blockData.primaryColor.copy(alpha = glowAlpha * 0.7f),
+                                blockData.secondaryColor.copy(alpha = glowAlpha * 0.3f),
+                                Color.Transparent
+                            ),
+                            center = Offset(canvasW / 2, canvasH / 2 + bounceOffset),
+                            radius = canvasW * 0.6f
+                        )
+                    )
                 }
-                number >= 1000 -> {
-                    drawThousandCubeBlock(number, blockData, canvasW, canvasH, bounceOffset)
-                }
-                number == 100 -> {
-                    drawHundredSquareBlock(blockData, canvasW, canvasH, bounceOffset)
-                }
-                else -> {
-                    drawStandardGridBlock(number, blockData, customRows, customCols, canvasW, canvasH, bounceOffset)
+
+                // Draw Base Layout according to number type
+                when {
+                    number >= 10000 -> {
+                        drawTenThousandMegaBlock(blockData, canvasW, canvasH, bounceOffset)
+                    }
+                    number >= 1000 -> {
+                        drawThousandCubeBlock(number, blockData, canvasW, canvasH, bounceOffset)
+                    }
+                    number == 100 -> {
+                        drawHundredSquareBlock(blockData, canvasW, canvasH, bounceOffset)
+                    }
+                    else -> {
+                        drawStandardGridBlock(number, blockData, customRows, customCols, canvasW, canvasH, bounceOffset)
+                    }
                 }
             }
+        }
+
+        if (showCatchphrase && blockData.catchphrase.isNotBlank()) {
+            Spacer(Modifier.height(3.dp))
+            Text(
+                text = "\"${blockData.catchphrase}\"",
+                color = Color(0xFFFFD54F),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.SemiBold
+            )
         }
     }
 }
